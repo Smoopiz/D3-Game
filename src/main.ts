@@ -20,6 +20,7 @@ const CLASSROOM = leaflet.latLng(36.997936938057016, -122.05703507501151);
 const GAME_ZOOM = 19;
 const TILE_DEG = 1e-4;
 const SPAWN_PROB = 0.35;
+const NEARBY_RADIUS = 3;
 
 const map = leaflet.map(mapDiv, {
   center: CLASSROOM,
@@ -59,7 +60,6 @@ function makeLabel(text: string) {
 function labelTextFor(v: number) {
   return v > 0 ? String(v) : "·";
 }
-
 function baseSpawns(i: number, j: number): boolean {
   return luck(`${i},${j},spawn`) < SPAWN_PROB;
 }
@@ -71,7 +71,6 @@ function baseValue(i: number, j: number): number {
   if (r < 0.75) return 4;
   return 8;
 }
-
 const overrides = new Map<string, number>();
 function currentValue(i: number, j: number): number {
   const k = `${i},${j}`;
@@ -83,6 +82,19 @@ function _setCurrentValue(i: number, j: number, v: number) {
   else overrides.set(k, v);
   const d = drawn.get(k);
   if (d) d.label.setIcon(makeLabel(labelTextFor(v)));
+}
+
+function cellOfLatLng(latlng: leaflet.LatLng) {
+  const i = Math.floor((latlng.lat - CLASSROOM.lat) / TILE_DEG);
+  const j = Math.floor((latlng.lng - CLASSROOM.lng) / TILE_DEG);
+  return { i, j };
+}
+const playerCell = cellOfLatLng(CLASSROOM);
+function manhattan(a: { i: number; j: number }, b: { i: number; j: number }) {
+  return Math.abs(a.i - b.i) + Math.abs(a.j - b.j);
+}
+function nearby(i: number, j: number) {
+  return manhattan({ i, j }, playerCell) <= NEARBY_RADIUS;
 }
 
 const drawn: Map<string, { rect: leaflet.Rectangle; label: leaflet.Marker }> =
@@ -98,6 +110,11 @@ function drawCell(i: number, j: number) {
   const label = leaflet
     .marker(center, { icon: makeLabel(labelTextFor(v)), interactive: false })
     .addTo(map);
+
+  rect.on("click", () => {
+    if (!nearby(i, j)) return;
+  });
+
   drawn.set(`${i},${j}`, { rect, label });
 }
 
