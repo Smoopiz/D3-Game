@@ -21,6 +21,7 @@ const GAME_ZOOM = 19;
 const TILE_DEG = 1e-4;
 const SPAWN_PROB = 0.35;
 const NEARBY_RADIUS = 3;
+const WIN_THRESHOLD = 16;
 
 const map = leaflet.map(mapDiv, {
   center: CLASSROOM,
@@ -76,7 +77,7 @@ function currentValue(i: number, j: number): number {
   const k = `${i},${j}`;
   return overrides.has(k) ? overrides.get(k)! : baseValue(i, j);
 }
-function _setCurrentValue(i: number, j: number, v: number) {
+function setCurrentValue(i: number, j: number, v: number) {
   const k = `${i},${j}`;
   if (v === baseValue(i, j)) overrides.delete(k);
   else overrides.set(k, v);
@@ -97,6 +98,14 @@ function nearby(i: number, j: number) {
   return manhattan({ i, j }, playerCell) <= NEARBY_RADIUS;
 }
 
+let holding = 0;
+function renderStatus() {
+  statusPanelDiv.textContent = holding
+    ? `Holding: ${holding}`
+    : "Holding: (none)";
+}
+renderStatus();
+
 const drawn: Map<string, { rect: leaflet.Rectangle; label: leaflet.Marker }> =
   new Map();
 
@@ -113,6 +122,30 @@ function drawCell(i: number, j: number) {
 
   rect.on("click", () => {
     if (!nearby(i, j)) return;
+
+    const here = currentValue(i, j);
+
+    if (holding === 0 && here > 0) {
+      holding = here;
+      setCurrentValue(i, j, 0);
+      renderStatus();
+      if (holding >= WIN_THRESHOLD) alert(`Nice! You’re holding ${holding}.`);
+      return;
+    }
+
+    if (holding > 0 && here === holding) {
+      setCurrentValue(i, j, holding * 2);
+      holding = 0;
+      renderStatus();
+      return;
+    }
+
+    if (holding > 0 && here === 0) {
+      setCurrentValue(i, j, holding);
+      holding = 0;
+      renderStatus();
+      return;
+    }
   });
 
   drawn.set(`${i},${j}`, { rect, label });
@@ -128,4 +161,3 @@ function drawCell(i: number, j: number) {
 })();
 
 controlPanelDiv.innerHTML = `<strong>Cache Crafter</strong>`;
-statusPanelDiv.textContent = "Holding: (none)";

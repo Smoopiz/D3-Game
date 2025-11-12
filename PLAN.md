@@ -23,5 +23,5 @@ Polish & win — nearby highlighting, instructions, win check (value ≥ 16), CS
 [X] Grid skeleton
 [X] Deterministic board
 [X] Interaction gating
-[] Inventory & actions
+[X] Inventory & actions
 [] Polish & win
