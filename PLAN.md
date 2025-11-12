@@ -1,27 +1,23 @@
-# D3: Cache Crafter (D3.a)
+# D3: Cache Crafter (D3.b)
 
 ## Game Design Vision
 
-A tiny map-crafting game around the classroom. Grid cells may contain tokens (deterministic). You can hold one at a time. Place your held token onto a nearby cell with an equal value to craft (double). Hit a target value to “win”.
+A globe-spanning grid-crafting game. The grid is defined over the entire Earth using a coordinate system anchored at Null Island. You can pan the map anywhere to _see_ cells, but only cells near your character are interactive. Cells are “memoryless” once they leave the screen, letting you farm tokens by moving in and out of range. Practice collecting and crafting to reach a higher-value target token and win.
 
 ## Technologies
 
 TypeScript, Leaflet, Deno/Vite build, GH Actions + Pages, deterministic hashing via luck().
 
-## D3.a Steps
+## D3.b Steps
 
-Map scaffold — fixed zoom map centered on classroom; UI panels.
-Grid skeleton — draw a grid that fills the viewport; per-cell labels visible.
-Deterministic board — spawn + value via luck(); current value resolution.
-Interaction gating — only allow clicks within ~3 cells of player.
-Inventory & actions — pick up, place, craft; status panel updates.
-Polish & win — nearby highlighting, instructions, win check (value ≥ 16), CSS tidy.
+Global grid scaffold — world map, player marker, Null-Island cell math.
+Viewport-driven grid — spawn/despawn cells based on map bounds.
+Player movement & nearby radius — N/S/E/W controls, local interaction zone.
+Crafting mastery & memoryless cells — inventory, crafting, higher win threshold, off-screen reset.
 
 ## Checklist
 
-[x] Map scaffold
-[X] Grid skeleton
-[X] Deterministic board
-[X] Interaction gating
-[X] Inventory & actions
-[X] Polish & win
+[X] Global grid scaffold
+[] Viewport-driven grid
+[] Player movement & nearby radius
+[] Crafting mastery & memoryless cells (then deploy, mark D3.b complete)
