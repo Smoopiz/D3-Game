@@ -1,6 +1,7 @@
 import leaflet from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./_leafletWorkaround.ts";
+import luck from "./_luck.ts";
 import "./style.css";
 
 const controlPanelDiv = document.createElement("div");
@@ -18,6 +19,7 @@ document.body.append(statusPanelDiv);
 const CLASSROOM = leaflet.latLng(36.997936938057016, -122.05703507501151);
 const GAME_ZOOM = 19;
 const TILE_DEG = 1e-4;
+const SPAWN_PROB = 0.35;
 
 const map = leaflet.map(mapDiv, {
   center: CLASSROOM,
@@ -54,6 +56,34 @@ function makeLabel(text: string) {
     iconAnchor: [15, 6],
   });
 }
+function labelTextFor(v: number) {
+  return v > 0 ? String(v) : "·";
+}
+
+function baseSpawns(i: number, j: number): boolean {
+  return luck(`${i},${j},spawn`) < SPAWN_PROB;
+}
+function baseValue(i: number, j: number): number {
+  if (!baseSpawns(i, j)) return 0;
+  const r = luck(`${i},${j},value`);
+  if (r < 0.25) return 1;
+  if (r < 0.5) return 2;
+  if (r < 0.75) return 4;
+  return 8;
+}
+
+const overrides = new Map<string, number>();
+function currentValue(i: number, j: number): number {
+  const k = `${i},${j}`;
+  return overrides.has(k) ? overrides.get(k)! : baseValue(i, j);
+}
+function _setCurrentValue(i: number, j: number, v: number) {
+  const k = `${i},${j}`;
+  if (v === baseValue(i, j)) overrides.delete(k);
+  else overrides.set(k, v);
+  const d = drawn.get(k);
+  if (d) d.label.setIcon(makeLabel(labelTextFor(v)));
+}
 
 const drawn: Map<string, { rect: leaflet.Rectangle; label: leaflet.Marker }> =
   new Map();
@@ -64,8 +94,9 @@ function drawCell(i: number, j: number) {
     map,
   );
   const center = b.getCenter();
+  const v = currentValue(i, j);
   const label = leaflet
-    .marker(center, { icon: makeLabel("·"), interactive: false })
+    .marker(center, { icon: makeLabel(labelTextFor(v)), interactive: false })
     .addTo(map);
   drawn.set(`${i},${j}`, { rect, label });
 }
