@@ -52,8 +52,7 @@ function ijToBounds(i: number, j: number): leaflet.LatLngBounds {
 function makeLabel(text: string) {
   return leaflet.divIcon({
     className: "cell-label",
-    html:
-      `<div style="font-size:12px;line-height:1;font-weight:600;text-align:center;">${text}</div>`,
+    html: `<div class="cell-label-inner">${text}</div>`,
     iconSize: [30, 12],
     iconAnchor: [15, 6],
   });
@@ -109,6 +108,16 @@ renderStatus();
 const drawn: Map<string, { rect: leaflet.Rectangle; label: leaflet.Marker }> =
   new Map();
 
+function styleCell(i: number, j: number) {
+  const item = drawn.get(`${i},${j}`);
+  if (!item) return;
+  item.rect.setStyle({
+    color: nearby(i, j) ? "#000" : "#888",
+    weight: nearby(i, j) ? 2 : 1,
+    fillOpacity: 0.05,
+  });
+}
+
 function drawCell(i: number, j: number) {
   const b = ijToBounds(i, j);
   const rect = leaflet.rectangle(b, { weight: 1, fillOpacity: 0.05 }).addTo(
@@ -122,7 +131,6 @@ function drawCell(i: number, j: number) {
 
   rect.on("click", () => {
     if (!nearby(i, j)) return;
-
     const here = currentValue(i, j);
 
     if (holding === 0 && here > 0) {
@@ -144,11 +152,11 @@ function drawCell(i: number, j: number) {
       setCurrentValue(i, j, holding);
       holding = 0;
       renderStatus();
-      return;
     }
   });
 
   drawn.set(`${i},${j}`, { rect, label });
+  styleCell(i, j);
 }
 
 (function drawInitialGrid() {
@@ -160,4 +168,7 @@ function drawCell(i: number, j: number) {
   }
 })();
 
-controlPanelDiv.innerHTML = `<strong>Cache Crafter</strong>`;
+controlPanelDiv.innerHTML = `
+  <div><strong>Cache Crafter</strong></div>
+  <div>Click nearby cells (≤ ${NEARBY_RADIUS}). Pick up one token. Place onto an <em>equal</em> token to craft (double)!</div>
+`;

@@ -24,4 +24,4 @@ Polish & win — nearby highlighting, instructions, win check (value ≥ 16), CS
 [X] Deterministic board
 [X] Interaction gating
 [X] Inventory & actions
-[] Polish & win
+[X] Polish & win
