@@ -20,7 +20,7 @@ Polish & win — nearby highlighting, instructions, win check (value ≥ 16), CS
 ## Checklist
 
 [x] Map scaffold
-[] Grid skeleton
+[X] Grid skeleton
 [] Deterministic board
 [] Interaction gating
 [] Inventory & actions
